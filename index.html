@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Segregation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        .brand {
+            padding: 30px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .brand h1 {
+            font-size: 32px;
+            font-weight: 700;
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+
+        .brand p {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .nav {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 30px;
+        }
+
+        .nav-label {
+            padding: 0 24px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 24px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-item .icon {
+            font-size: 20px;
+            margin-right: 12px;
+            width: 24px;
+        }
+
+        .nav-item .count {
+            margin-left: auto;
+            background: white;
+            color: #1e40af;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
+        .topbar {
+            background: white;
+            padding: 20px 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+            display: none;
+        }
+
+        .topbar h2 {
+            font-size: 22px;
+            color: #1f2937;
+        }
+
+        .segregation-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .segregation-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .content-area {
+            padding: 30px;
+        }
+
+        /* Upload Cards Grid */
+        .upload-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .upload-card {
+            background: white;
+            border-radius: 16px;
+            padding: 35px 25px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .upload-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            border-color: #3b82f6;
+        }
+
+        .upload-card .icon-box {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .upload-card .icon-box svg {
+            width: 40px;
+            height: 40px;
+            color: #2563eb;
+        }
+
+        .upload-card h3 {
+            color: #2563eb;
+            font-size: 19px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .upload-card .file-type {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .upload-card .action-text {
+            color: #2563eb;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .upload-card .hint {
+            color: #9ca3af;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .upload-card .size-limit {
+            color: #3b82f6;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Section Cards */
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .section h3 {
+            color: #2563eb;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        /* Batch Item */
+        .batch-container {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .batch-details h4 {
+            font-size: 17px;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+
+        .batch-details p {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .batch-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: #2563eb;
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #1d4ed8;
+            transform: scale(1.05);
+        }
+
+        .action-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        /* Table */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table thead tr {
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .history-table th {
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .history-table tbody tr {
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.2s;
+        }
+
+        .history-table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .history-table td {
+            padding: 16px;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .status-tag {
+            display: inline-block;
+            padding: 6px 14px;
+            background: #d1fae5;
+            color: #065f46;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Upload Progress Modal */
+        .upload-progress-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .upload-progress-modal.active {
+            display: flex;
+        }
+
+        .progress-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-icon {
+            font-size: 60px;
+            color: #2563eb;
+            margin-bottom: 20px;
+        }
+
+        .progress-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .progress-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .progress-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .progress-btn.continue {
+            background: #2563eb;
+            color: white;
+        }
+
+        .progress-btn.continue:hover {
+            background: #1d4ed8;
+        }
+
+        /* Logout Page Styles */
+        .logout-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logout-page.active {
+            display: flex;
+        }
+
+        .logout-content {
+            background: white;
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logout-content i {
+            font-size: 80px;
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+
+        .logout-content h2 {
+            font-size: 32px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .logout-content p {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+
+        .logout-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .logout-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .logout-btn.confirm {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .logout-btn.confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .logout-btn.cancel {
+            background: linear-gradient(to right, #95a5a6, #7f8c8d);
+            color: white;
+        }
+
+        .logout-btn.cancel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(149, 165, 166, 0.4);
+        }
+
+        /* Logged Out Success Page */
+        .logged-out-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logged-out-page.active {
+            display: flex;
+        }
+
+        .logged-out-content {
+            background: white;
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .logged-out-content i {
+            font-size: 80px;
+            color: #27ae60;
+            margin-bottom: 20px;
+        }
+
+        .logged-out-content h2 {
+            font-size: 32px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .logged-out-content p {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+
+        .login-again-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .login-again-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        /* Overlay for mobile */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* File Preview */
+        .file-preview {
+            max-width: 100%;
+            max-height: 200px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.visible {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .upload-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .topbar-left {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .segregation-btn {
+                width: 100%;
+                justify-content: center;
+                margin-top: 10px;
+            }
+        }
+
+
+
+
+    </style>
+</head>
+<body>
+
+
+
+    
+
+
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+    
+    <!-- Upload Progress Modal -->
+    <div class="upload-progress-modal" id="uploadProgressModal">
+        <div class="progress-content">
+            <div class="progress-icon">
+                <i class="fas fa-file-upload"></i>
+            </div>
+            <h3 id="progressTitle">Uploading Files</h3>
+            <div class="progress-text" id="progressText">Preparing files...</div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="progress-info">
+                <span id="currentFileCount">0</span> of <span id="totalFileCount">0</span> files
+                <span id="percentageComplete">0%</span>
+            </div>
+            
+            <div class="progress-actions" id="progressActions">
+                <button class="progress-btn continue" onclick="continueToDocumentBucket()">
+                    <i class="fas fa-arrow-right"></i> Continue to Document Bucket
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <h1>MevSeg</h1>
+                <p>Smart Segregation</p>
+            </div>
+            
+            <nav class="nav">
+                <div class="nav-section">
+                    <div class="nav-label">MENU</div>
+                    <a href="home.html" class="nav-item">
+                        <span class="icon">🏠</span>
+                        <span>Home</span>
+                    </a>
+                    <a href="smartSegregation.html" class="nav-item active">
+                        <span class="icon">📄</span>
+                        <span>Manage Docs</span>
+                        <span class="count">12</span>
+                    </a>
+                    <a href="work.html" class="nav-item">
+                        <span class="icon">💼</span>
+                        <span>Workspace</span>
+                    </a>
+                    <a href="results.html" class="nav-item">
+                        <span class="icon">📊</span>
+                        <span>Results</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-label">SETTINGS</div>
+                    <a href="Profile.html" class="nav-item">
+                        <span class="icon">👤</span>
+                        <span>Profile</span>
+                    </a>
+                    <a href="help.html" class="nav-item">
+                        <span class="icon">❓</span>
+                        <span>Help</span>
+                    </a>
+                    <a href="logout.html" class="nav-item" id="logoutBtn">
+                        <span class="icon">🚪</span>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content" id="mainContent">
+            <div class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">☰</button>
+                    <h2>Upload Panel</h2>
+                </div>
+                <button class="segregation-btn" onclick="startSegregation()">
+                    <i class="fas fa-play-circle"></i>
+                   <a href="DocumentBucketSystem.html">Start Segregation</a> 
+                </button>
+            </div>
+
+            <div class="content-area">
+                <!-- Upload Options -->
+                <div class="upload-cards">
+                    <!-- Single Image Upload -->
+                    <div class="upload-card" onclick="triggerUpload('imageUpload')">
+                        <div class="icon-box">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <h3>Upload Single Image</h3>
+                        <p class="file-type">(.jpg/.jpeg/.png/.tiff)</p>
+                        <p class="action-text">Click to upload Single Image</p>
+                        <p class="hint">or drag and drop</p>
+                        <p class="size-limit">(MAX. 100MB)</p>
+                        <input type="file" id="imageUpload" class="file-input" accept=".jpg,.jpeg,.png,.tiff,.webp" onchange="handleUpload(event, 'image')">
+                    </div>
+
+                    <!-- Single PDF Upload -->
+                    <div class="upload-card" onclick="triggerUpload('pdfUpload')">
+                        <div class="icon-box">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <h3>Upload Single PDF</h3>
+                        <p class="file-type">(.pdf only)</p>
+                        <p class="action-text">Click to upload Single PDF</p>
+                        <p class="hint">or drag and drop</p>
+                        <p class="size-limit">(MAX. 100MB)</p>
+                        <input type="file" id="pdfUpload" class="file-input" accept=".pdf" onchange="handleUpload(event, 'pdf')">
+                    </div>
+
+                    <!-- Folder Upload -->
+                    <div class="upload-card" onclick="triggerUpload('folderUpload')">
+                        <div class="icon-box">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                        </div>
+                        <h3>Upload Folder (Bulk Upload)</h3>
+                        <p class="file-type">Images and/or PDFs</p>
+                        <p class="action-text">Click to upload an entire folder</p>
+                        <p class="hint">or drag and drop</p>
+                        <p class="size-limit">(MAX. 1GB)</p>
+                        <input type="file" id="folderUpload" class="file-input" multiple webkitdirectory mozdirectory onchange="handleUpload(event, 'folder')">
+                    </div>
+                </div>
+
+                <!-- Uploaded Batches -->
+                <div class="section">
+                    <h3>Uploaded Batches</h3>
+                    <div class="batch-container" id="batchContainer">
+                        <div class="batch-details">
+                            <h4>F-5-4-89-MP</h4>
+                            <p>folder • 12 pages</p>
+                        </div>
+                        <div class="batch-buttons">
+                            <button class="action-btn" onclick="viewBatch()" title="View">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                            <button class="action-btn" onclick="removeBatch()" title="Delete">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload History -->
+                <div class="section">
+                    <h3>Upload history</h3>
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Pages</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            <tr>
+                                <td>F-5-4-89-MP</td>
+                                <td>folder</td>
+                                <td>12</td>
+                                <td>8/26/2025</td>
+                                <td>11:25:07 AM</td>
+                                <td><span class="status-tag">segregated</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Logout Confirmation Page -->
+    <div class="logout-page" id="logoutPage">
+        <div class="logout-content">
+            <i class="fas fa-sign-out-alt"></i>
+            <h2>Logout Confirmation</h2>
+            <p>Are you sure you want to logout from MevSeg?</p>
+            <div class="logout-buttons">
+                <button class="logout-btn confirm" id="confirmLogout">Yes, Logout</button>
+                <button class="logout-btn cancel" id="cancelLogout">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logged Out Success Page -->
+    <div class="logged-out-page" id="loggedOutPage">
+        <div class="logged-out-content">
+            <i class="fas fa-check-circle"></i>
+            <h2>Successfully Logged Out!</h2>
+            <p>You have been logged out of MevSeg. Thank you for using our service!</p>
+            <button class="login-again-btn" id="loginAgainBtn">Login Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let batches = [];
+        let currentUploadFiles = [];
+        let currentUploadType = '';
+        let uploadProgress = 0;
+        let uploadComplete = false;
+
+        // Toggle mobile menu
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('visible');
+                overlay.classList.toggle('active');
+            }
+        }
+
+        // Start segregation process
+        function startSegregation() {
+            // Check if there are uploaded files
+            const batchData = JSON.parse(localStorage.getItem('currentBatchData') || '{}');
+            
+            if (!batchData || !batchData.files || batchData.files.length === 0) {
+                alert('Please upload files first before starting segregation.');
+                return;
+            }
+            
+            // Navigate to Document Bucket System
+            window.location.href = 'DocumentBucketSystem.html';
+        }
+
+        // Trigger file upload
+        function triggerUpload(inputId) {
+            document.getElementById(inputId).click();
+        }
+
+        // Handle file upload - UPDATED VERSION
+        function handleUpload(event, type) {
+            const files = event.target.files;
+            if (files.length === 0) return;
+
+            currentUploadFiles = Array.from(files);
+            currentUploadType = type;
+            
+            // Show upload progress modal
+            showUploadProgress();
+            
+            // Start processing files
+            processFilesForDocumentBucket(currentUploadFiles, type);
+            
+            // Also update local history
+            const fileName = files.length === 1 ? files[0].name : `${files[0].name} +${files.length - 1} more`;
+            const fileCount = files.length;
+            
+            addToHistory(fileName, type, fileCount);
+        }
+
+        // Show upload progress modal
+        function showUploadProgress() {
+            const modal = document.getElementById('uploadProgressModal');
+            const totalFileCount = document.getElementById('totalFileCount');
+            const progressTitle = document.getElementById('progressTitle');
+            const progressText = document.getElementById('progressText');
+            
+            // Reset progress
+            uploadProgress = 0;
+            uploadComplete = false;
+            updateProgressBar();
+            
+            // Update modal content
+            totalFileCount.textContent = currentUploadFiles.length;
+            document.getElementById('currentFileCount').textContent = '0';
+            document.getElementById('percentageComplete').textContent = '0%';
+            
+            progressTitle.textContent = `Uploading ${currentUploadType === 'folder' ? 'Folder' : 
+                                       currentUploadType === 'image' ? 'Image' : 'PDF'}`;
+            progressText.textContent = `Processing ${currentUploadFiles.length} file(s)...`;
+            
+            // Hide continue button initially
+            document.getElementById('progressActions').style.display = 'none';
+            
+            // Show modal
+            modal.classList.add('active');
+        }
+
+        // Update progress bar
+        function updateProgressBar() {
+            const progressFill = document.getElementById('progressFill');
+            const currentFileCount = document.getElementById('currentFileCount');
+            const percentageComplete = document.getElementById('percentageComplete');
+            
+            progressFill.style.width = `${uploadProgress}%`;
+            currentFileCount.textContent = Math.floor((uploadProgress / 100) * currentUploadFiles.length);
+            percentageComplete.textContent = `${Math.round(uploadProgress)}%`;
+        }
+
+        // Process files for Document Bucket System
+        function processFilesForDocumentBucket(files, type) {
+            const fileList = Array.from(files);
+            const uploadTime = new Date();
+            
+            // Create batch data
+            const batchData = {
+                id: 'batch_' + Date.now(),
+                name: fileList.length === 1 ? 
+                    fileList[0].name.replace(/\.[^/.]+$/, "") : // Remove extension
+                    `Batch_${uploadTime.getTime()}`,
+                type: type,
+                files: [],
+                totalFiles: fileList.length,
+                uploadDate: uploadTime.toLocaleDateString(),
+                uploadTime: uploadTime.toLocaleTimeString(),
+                timestamp: uploadTime.toISOString(),
+                status: 'pending'
+            };
+            
+            // Process each file
+            let processedCount = 0;
+            
+            fileList.forEach((file, index) => {
+                setTimeout(() => {
+                    processSingleFile(file, index, batchData, () => {
+                        processedCount++;
+                        
+                        // Update progress
+                        uploadProgress = (processedCount / fileList.length) * 100;
+                        updateProgressBar();
+                        
+                        document.getElementById('progressText').textContent = 
+                            `Processing file ${processedCount} of ${fileList.length}: ${file.name}`;
+                        
+                        // When all files are processed
+                        if (processedCount === fileList.length) {
+                            uploadComplete = true;
+                            document.getElementById('progressText').textContent = 
+                                `Successfully processed ${fileList.length} file(s)!`;
+                            
+                            // Show continue button
+                            document.getElementById('progressActions').style.display = 'flex';
+                            
+                            // Save to localStorage
+                            saveBatchForDocumentBucket(batchData);
+                        }
+                    });
+                }, index * 100); // Stagger processing
+            });
+        }
+
+        // Process single file
+        function processSingleFile(file, index, batchData, callback) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const fileExtension = file.name.split('.').pop().toLowerCase();
+                const isImage = ['jpg', 'jpeg', 'png', 'tiff', 'webp', 'gif', 'bmp'].includes(fileExtension);
+                const isPDF = fileExtension === 'pdf';
+                
+                const fileData = {
+                    id: `file_${Date.now()}_${index}`,
+                    name: file.name,
+                    originalName: file.name,
+                    size: file.size,
+                    type: isImage ? 'image' : isPDF ? 'pdf' : 'other',
+                    mimeType: file.type,
+                    extension: fileExtension,
+                    dataUrl: e.target.result,
+                    pageIndex: index,
+                    status: 'pending',
+                    assignedBucket: null,
+                    uploadTime: new Date().toISOString()
+                };
+                
+                batchData.files.push(fileData);
+                callback();
+            };
+            
+            reader.onerror = function() {
+                console.error('Error reading file:', file.name);
+                callback();
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        // Save batch data for Document Bucket System
+        function saveBatchForDocumentBucket(batchData) {
+            // Save to localStorage
+            localStorage.setItem('currentBatch', batchData.name);
+            localStorage.setItem('currentBatchData', JSON.stringify(batchData));
+            
+            // Also save to batch history
+            let allBatches = JSON.parse(localStorage.getItem('allBatches') || '[]');
+            allBatches.unshift(batchData);
+            localStorage.setItem('allBatches', JSON.stringify(allBatches));
+            
+            console.log(`Batch "${batchData.name}" saved with ${batchData.totalFiles} files`);
+            
+            // Update the batches display
+            updateBatchesDisplay(batchData);
+        }
+
+        // Update batches display
+        function updateBatchesDisplay(batchData) {
+            const batchContainer = document.getElementById('batchContainer');
+            
+            batchContainer.innerHTML = `
+                <div class="batch-details">
+                    <h4>${batchData.name}</h4>
+                    <p>${batchData.type} • ${batchData.totalFiles} files</p>
+                    <p style="font-size: 12px; color: #666;">Ready for segregation</p>
+                </div>
+                <div class="batch-buttons">
+                    <button class="action-btn" onclick="viewUploadedBatch()" title="View">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </button>
+                    <button class="action-btn" onclick="removeUploadedBatch()" title="Delete">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+        }
+
+        // Continue to Document Bucket System
+        function continueToDocumentBucket() {
+            if (!uploadComplete) {
+                alert('Please wait for all files to finish uploading.');
+                return;
+            }
+            
+            // Close progress modal
+            document.getElementById('uploadProgressModal').classList.remove('active');
+            
+            // // Navigate to Document Bucket System
+            // window.location.href = 'DocumentBucketSystem.html';
+        }
+
+        // View uploaded batch
+        function viewUploadedBatch() {
+            const batchData = JSON.parse(localStorage.getItem('currentBatchData') || '{}');
+            
+            if (!batchData || !batchData.files || batchData.files.length === 0) {
+                alert('No uploaded batch to view.');
+                return;
+            }
+            
+            let fileList = '';
+            batchData.files.forEach((file, index) => {
+                fileList += `${index + 1}. ${file.name} (${file.type})\n`;
+            });
+            
+            alert(`Batch: ${batchData.name}\n\nFiles:\n${fileList}\nTotal: ${batchData.totalFiles} files`);
+        }
+
+        // Remove uploaded batch
+        function removeUploadedBatch() {
+            if (confirm('Are you sure you want to delete this batch?')) {
+                // Clear localStorage
+                localStorage.removeItem('currentBatch');
+                localStorage.removeItem('currentBatchData');
+                
+                // Reset batches display
+                const batchContainer = document.getElementById('batchContainer');
+                batchContainer.innerHTML = `
+                    <div class="batch-details">
+                        <h4>No Batch Available</h4>
+                        <p>Upload files to create a batch</p>
+                    </div>
+                    <div class="batch-buttons">
+                        <button class="action-btn" onclick="viewBatch()" title="View" disabled style="opacity: 0.5;">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </button>
+                        <button class="action-btn" onclick="removeBatch()" title="Delete" disabled style="opacity: 0.5;">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                
+                alert('Batch deleted successfully.');
+            }
+        }
+
+        // Add to history table
+        function addToHistory(name, type, count) {
+            const tbody = document.getElementById('historyBody');
+            const now = new Date();
+            const date = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
+            const time = now.toLocaleTimeString('en-US');
+
+            const row = tbody.insertRow(0);
+            row.innerHTML = `
+                <td>${name}</td>
+                <td>${type}</td>
+                <td>${count}</td>
+                <td>${date}</td>
+                <td>${time}</td>
+                <td><span class="status-tag" style="background:#fef3c7;color:#92400e;">processing</span></td>
+            `;
+
+            setTimeout(() => {
+                const statusTag = row.querySelector('.status-tag');
+                statusTag.textContent = 'segregated';
+                statusTag.style.background = '#d1fae5';
+                statusTag.style.color = '#065f46';
+            }, 2000);
+
+            batches.push({ name, type, pages: count });
+            updateBatchesUI();
+        }
+
+        // Update batches UI (for local display)
+        function updateBatchesUI() {
+            const container = document.getElementById('batchContainer');
+
+            if (!batches.length) {
+                container.innerHTML = '<p style="text-align:center;color:#9ca3af;padding:20px;">No batches available</p>';
+                return;
+            }
+
+            const latest = batches[batches.length - 1];
+
+            container.innerHTML = `
+                <div class="batch-details">
+                    <h4>${latest.name}</h4>
+                    <p>${latest.type} • ${latest.pages} page(s)</p>
+                </div>
+                <div class="batch-buttons">
+                    <button class="action-btn" onclick="viewBatch()" title="View">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </button>
+                    <button class="action-btn" onclick="removeBatch()" title="Delete">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+        }
+
+        // View batch (demo)
+        function viewBatch() {
+            if (!batches.length) {
+                alert('No batch to view.');
+                return;
+            }
+            const latest = batches[batches.length - 1];
+            alert(`Viewing batch:\n\nName: ${latest.name}\nType: ${latest.type}\nPages: ${latest.pages}`);
+        }
+
+        // Remove batch (clears list and UI)
+        function removeBatch() {
+            if (confirm('Are you sure you want to delete this batch?')) {
+                batches = [];
+                const container = document.getElementById('batchContainer');
+                container.innerHTML = '<p style="text-align:center;color:#9ca3af;padding:20px;">No batches available</p>';
+            }
+        }
+
+        // Drag and drop support
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize drag and drop for upload cards
+            document.querySelectorAll('.upload-card').forEach((card, index) => {
+                card.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    card.style.borderColor = '#3b82f6';
+                    card.style.background = '#eff6ff';
+                });
+
+                card.addEventListener('dragleave', () => {
+                    card.style.borderColor = 'transparent';
+                    card.style.background = 'white';
+                });
+
+                card.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    card.style.borderColor = 'transparent';
+                    card.style.background = 'white';
+
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const inputIds = ['imageUpload', 'pdfUpload', 'folderUpload'];
+                        const types = ['image', 'pdf', 'folder'];
+                        const input = document.getElementById(inputIds[index]);
+                        const dataTransfer = new DataTransfer();
+
+                        for (let i = 0; i < files.length; i++) {
+                            dataTransfer.items.add(files[i]);
+                        }
+
+                        input.files = dataTransfer.files;
+                        handleUpload({ target: input }, types[index]);
+                    }
+                });
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    document.getElementById('sidebar').classList.remove('visible');
+                    document.getElementById('overlay').classList.remove('active');
+                }
+            });
+
+            // Initialize batches UI
+            updateBatchesUI();
+
+            // Load existing batch if available
+            const existingBatch = JSON.parse(localStorage.getItem('currentBatchData') || '{}');
+            if (existingBatch && existingBatch.files && existingBatch.files.length > 0) {
+                updateBatchesDisplay(existingBatch);
+            }
+
+            // Logout functionality
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutPage = document.getElementById('logoutPage');
+            const confirmLogout = document.getElementById('confirmLogout');
+            const cancelLogout = document.getElementById('cancelLogout');
+            const loggedOutPage = document.getElementById('loggedOutPage');
+            const loginAgainBtn = document.getElementById('loginAgainBtn');
+
+            // Show logout confirmation
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    logoutPage.classList.add('active');
+                });
+            }
+
+            // Cancel logout
+            if (cancelLogout) {
+                cancelLogout.addEventListener('click', function() {
+                    logoutPage.classList.remove('active');
+                });
+            }
+
+            // Confirm logout
+            if (confirmLogout) {
+                confirmLogout.addEventListener('click', function() {
+                    logoutPage.classList.remove('active');
+                    // Show logged out success page
+                    setTimeout(() => {
+                        loggedOutPage.classList.add('active');
+                    }, 300);
+                });
+            }
+
+            // Login again button
+            if (loginAgainBtn) {
+                loginAgainBtn.addEventListener('click', function() {
+                    loggedOutPage.classList.remove('active');
+                });
+            }
+        });
+
+        // Auto-close upload modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('uploadProgressModal').classList.remove('active');
+            }
+
+
+
+
+        })
+  </script>
+
+</body>
+
+
+
+</html>
