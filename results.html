@@ -1,0 +1,725 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Segregation Results</title>
+  
+<style>
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Light background */
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e0f2ff 0%, #f5f9ff 40%, #ffffff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: #0f172a;
+}
+
+/* Main card */
+.results-wrapper {
+  width: 100%;
+  max-width: 1100px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px 26px 18px 26px;
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.35);
+}
+
+/* Header */
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.results-header h1 {
+  font-size: 1.7rem;
+  font-weight: 600;
+  color: #1d4ed8;
+}
+
+.results-header p {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.tag {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #e0edff;
+  color: #1d4ed8;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 6px 0 14px 0;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+  font-size: 11px;
+  color: #1f2937;
+  background: #f3f6ff;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.chip.active {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.chip:hover {
+  border-color: #93c5fd;
+}
+
+/* Export button */
+.export-btn {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.export-btn span:last-child {
+  font-size: 16px;
+}
+
+.export-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(37, 99, 235, 0.35);
+}
+
+/* Table card */
+.table-card {
+  margin-top: 4px;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #dbe3f5;
+  overflow: hidden;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #eef3ff;
+}
+
+th,
+td {
+  padding: 10px 14px;
+  font-size: 13px;
+  text-align: left;
+}
+
+th {
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid #d4def7;
+}
+
+tbody tr {
+  border-bottom: 1px solid #edf2ff;
+  transition: background 0.15s;
+}
+
+tbody tr:hover {
+  background: #f5f7ff;
+}
+
+td {
+  color: #111827;
+}
+
+/* Status pills */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.status-success {
+  background: #ecfdf3;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.status-processing {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.status-failed {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+/* Footer */
+.footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.footer-row a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footer-row a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  body {
+    padding: 12px;
+  }
+
+  .results-wrapper {
+    padding: 18px 14px 14px 14px;
+  }
+
+  .results-header h1 {
+    font-size: 1.4rem;
+  }
+
+  th,
+  td {
+    padding: 8px 10px;
+  }
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="results-wrapper">
+    <div class="results-header">
+      <div>
+        <h1>Segregation Results</h1>
+        <p>Overview of your latest document batches and their segregation status.</p>
+      </div>
+      <span class="tag">Results Center</span>
+    </div>
+
+    <div class="toolbar">
+      <div class="filters">
+        <button class="chip active">All</button>
+        <button class="chip">Completed</button>
+        <button class="chip">Processing</button>
+        <button class="chip">Failed</button>
+      </div>
+      <button class="export-btn" onclick="alert('Export summary coming soon!')">
+        <span>Export Summary</span>
+        <span>⬇</span>
+      </button>
+    </div>
+
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Batch Name</th>
+            <th>Type</th>
+            <th>Total Pages</th>
+            <th>Completed On</th>
+            <th>Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>F-5-4-89-MP_CIBIL</td>
+            <td>PDF</td>
+            <td>5</td>
+            <td>28/11/2025</td>
+            <td>11:30 AM</td>
+            <td>
+              <span class="status-pill status-success">
+                <span class="status-dot"></span> Segregated
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>F-5-4-89-MP_TIR</td>
+            <td>PDF</td>
+            <td>5</td>
+            <td> -->
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Segregation Results</title>
+  
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Colorful gradient background */
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg,    hsl(224, 70%, 65%) 100%  );
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: #0f172a;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Main card with glassmorphism effect */
+.results-wrapper {
+  width: 100%;
+  max-width: 1100px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border-radius: 18px;
+  padding: 24px 26px 18px 26px;
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Header */
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.results-header h1 {
+  font-size: 1.7rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.results-header p {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.tag {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 6px 0 14px 0;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+  font-size: 11px;
+  color: #1f2937;
+  background: #f3f6ff;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chip.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-color: #1d4ed8;
+  color: #ffffff;
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.chip:hover {
+  border-color: #93c5fd;
+  transform: translateY(-1px);
+}
+
+/* Export button */
+.export-btn {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.export-btn span:last-child {
+  font-size: 16px;
+}
+
+.export-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(102, 126, 234, 0.4);
+}
+
+/* Table card */
+.table-card {
+  margin-top: 4px;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #dbe3f5;
+  overflow: hidden;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: gradient(135deg, hsl(222, 76%, 36%), hsl(226, 83%, 43%));
+}
+
+th,
+td {
+  padding: 10px 14px;
+  font-size: 13px;
+  text-align: left;
+}
+
+th {
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid #d4def7;
+}
+
+tbody tr {
+  border-bottom: 1px solid #edf2ff;
+  transition: background 0.15s;
+}
+
+tbody tr:hover {
+  background: #f5f7ff;
+}
+
+td {
+  color: #111827;
+}
+
+/* Status pills */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.status-success {
+  background: gradient(135deg, hsl(236, 91%, 37%), #021ebb);
+   color: #16a34a;
+  border: 1px solid #bbf7d0;
+} 
+/* 
+.status-processing {
+  background: radial-gradient(135deg, #fffbeb, #fef3c7);
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.status-failed {
+  background: conic-linear-gradient(135deg, #fef2f2, #fecaca);
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}  */
+
+/* Footer */
+.footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.footer-row a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footer-row a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  body {
+    padding: 12px;
+  }
+
+  .results-wrapper {
+    padding: 18px 14px 14px 14px;
+  }
+
+  .results-header h1 {
+    font-size: 1.4rem;
+  }
+
+  th,
+  td {
+    padding: 8px 10px;
+  }
+}
+</style>
+</head>
+<body>
+
+  
+  <div class="results-wrapper">
+    <div class="results-header">
+      <div>
+        <h1>Segregation Results</h1>
+        <p>Overview of your latest document batches and their segregation status.</p>
+      </div>
+      <span class="tag">Results Center</span>
+    </div>
+
+    <div class="toolbar">
+      <div class="filters">
+        <button class="chip active">All</button>
+        <button class="chip">Completed</button>
+        <button class="chip">Processing</button>
+        <button class="chip">Failed</button>
+      </div>
+      <button class="export-btn" onclick="alert('Export summary coming soon!')">
+        <span>Export Summary</span>
+        <span>⬇</span>
+      </button>
+    </div>
+
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Batch Name</th>
+            <th>Type</th>
+            <th>Total Pages</th>
+            <th>Completed On</th>
+            <th>Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>F-5-4-89-MP_CIBIL</td>
+            <td>PDF</td>
+            <td>5</td>
+            <td>28/11/2025</td>
+            <td>11:30 AM</td>
+            <td>
+              <span class="status-pill status-success">
+                <span class="status-dot"></span> Segregated
+              </span>
+            </td>
+          </tr>
+
+          
+          <tr>
+            <td>F-5-4-89-MP_TIR</td>
+            <td>PDF</td>
+            <td>5</td>
+            <td>28/11/2025</td>
+            <td>11:25 AM</td>
+            <td>
+              <span class="status-pill status-processing">
+                <span class="status-dot"></span> Processing
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>F-5-4-89-MP_CRF</td>
+            <td>PDF</td>
+            <td>5</td>
+            <td>28/11/2025</td>
+            <td>11:20 AM</td>
+            <td>
+              <span class="status-pill status-failed">
+                <span class="status-dot"></span> Failed
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>F-5-4-89-MP_Bank</td>
+            <td>PDF</td>
+            <td>5</td>
+            <td>28/11/2025</td>
+            <td>11:15 AM</td>
+            <td>
+              <span class="status-pill status-success">
+                <span class="status-dot"></span> Segregated
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td>F-5-4-89-MP_Aadhar</td>
+            <td>PDF</td>
+            <td>5</td>
+            <td>28/11/2025</td>
+            <td>11:10 AM</td>
+            <td>
+              <span class="status-pill status-success">
+                <span class="status-dot"></span> Segregated
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer-row">
+      <div>Showing 5 of 12 batches</div>
+      <div>
+        <a href="index.html">View all batches</a> | 
+        <a href="help.html">Help & Support</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Add interactivity to filter chips
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', function() {
+        // Remove active class from all chips
+        document.querySelectorAll('.chip').forEach(c => {
+          c.classList.remove('active');
+        });
+        
+        // Add active class to clicked chip
+        this.classList.add('active');
+        
+        // In a real app, you would filter the table here
+        // For this demo, we'll just show an alert
+        alert(`Filtering by: ${this.textContent}`);
+      });
+    });
+  </script>
+</body>
+</html>
