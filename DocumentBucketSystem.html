@@ -1,0 +1,1510 @@
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Folder PDF Page Counter</title>
+
+<style>
+    body {
+        font-family: "Poppins", sans-serif;
+        background: #eef2f3;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .upload-btn {
+        background: #2575fc;
+        padding: 14px 26px;
+        color: white;
+        border: none;
+        font-size: 17px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .upload-btn:hover {
+        background: #1a5cd7;
+    }
+
+    .summary-card {
+        width: 380px;
+        padding: 22px 30px;
+        margin-top: 30px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+        animation: fadeIn 0.35s ease-in-out;
+        display: none;
+    }
+    .summary-card h3 {
+        text-align: center;
+        margin-bottom: 18px;
+        font-size: 22px;
+    }
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        font-size: 17px;
+        border-bottom: 1px solid #ddd;
+    }
+    .summary-row.total {
+        font-weight: 600;
+        font-size: 19px;
+        color: #2575fc;
+        border-bottom: none;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
+</head>
+<body>
+
+<h2>📁 Upload Folder to Count Total PDF Pages</h2>
+
+<input type="file" id="folderUpload" webkitdirectory multiple style="display:none;">
+<button class="upload-btn" onclick="document.getElementById('folderUpload').click()">Select Folder</button>
+
+<div class="summary-card" id="summaryCard">
+    <h3>📄 PDF Page Summary</h3>
+
+    <div class="summary-row">
+        <span>📦 Total PDFs:</span>
+        <span id="pdfCount"></span>
+    </div>
+
+    <div class="summary-row">
+        <span>🖼️ Total Images:</span>
+        <span id="imageCount"></span>
+    </div>
+
+    <div class="summary-row total">
+        <span>📄 Total PDF Pages:</span>
+        <span id="pageCount"></span>
+    </div>
+</div>
+
+
+<a href="smartSegregation.html">back</a>
+<script>
+document.getElementById("folderUpload").addEventListener("change", async function (event) {
+    let files = event.target.files;
+    let pdfFiles = [];
+    let totalPages = 0;
+    let imageFiles = [];
+
+    
+    const imgExt = [".jpg", ".jpeg", ".png", ".webp"];
+
+  
+    for (let file of files) {
+        let name = file.name.toLowerCase();
+
+        if (name.endsWith(".pdf")) {
+            pdfFiles.push(file);
+        }
+        else if (imgExt.some(ext => name.endsWith(ext))) {
+            imageFiles.push(file);
+        }
+    }
+
+ 
+    for (let pdfFile of pdfFiles) {
+        let buffer = await pdfFile.arrayBuffer();
+        let pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+        totalPages += pdf.numPages;
+    }
+
+    document.getElementById("pdfCount").innerText = pdfFiles.length;
+    document.getElementById("imageCount").innerText = imageFiles.length;
+    document.getElementById("pageCount").innerText = totalPages;
+
+    document.getElementById("summaryCard").style.display = "block";
+});
+</script>
+
+</body>
+</html>  -->
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Bucket System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 200px;
+            background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-header {
+            padding: 16px;
+            font-weight: bold;
+            font-size: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-links {
+            flex: 1;
+            padding: 8px 0;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .badge {
+            background: white;
+            color: #1e3a8a;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .settings-section {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 0;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f3f4f6;
+        }
+
+        .header {
+            background: #1f2937;
+
+
+
+
+
+
+
+
+
+
+
+            
+            color: white;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 4px 8px;
+            font-size: 14px;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .upload-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .upload-btn {
+            background: #2563eb;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .upload-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .workspace-area {
+            flex: 1;
+            display: flex;
+            padding: 24px;
+            gap: 24px;
+            overflow: auto;
+        }
+
+        .document-viewer {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .document-display {
+            width: 100%;
+            max-width: 600px;
+            height: 500px;
+            background: #fafafa;
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #pdfCanvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: none;
+        }
+
+        .doc-icon {
+            font-size: 80px;
+            margin-bottom: 16px;
+        }
+
+        .doc-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .doc-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+
+        .assignment-badge {
+            margin-top: 12px;
+            padding: 8px 16px;
+            background: #dcfce7;
+            color: #16a34a;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .right-panel {
+            width: 340px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .bucket-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .bucket-card {
+            padding: 16px;
+            background: white;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .bucket-card:hover {
+            border-color: #3b82f6;
+        }
+
+        .bucket-card.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+        }
+
+        .bucket-label {
+            font-weight: bold;
+            font-size: 16px;
+            color: #1f2937;
+        }
+
+        .bucket-pages {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .assignment-box {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 16px;
+        }
+
+        .assignment-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1f2937;
+        }
+
+        .bucket-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .bucket-btn {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .bucket-btn:hover {
+            border-color: #3b82f6;
+        }
+
+        .bucket-btn.selected {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .assign-btn {
+            width: 100%;
+            padding: 10px;
+            background: #d1d5db;
+            color: #6b7280;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: not-allowed;
+            font-size: 14px;
+        }
+
+        .assign-btn.active {
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+
+        .assign-btn.active:hover {
+            background: #1d4ed8;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: 2px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: #f9fafb;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .nav-btn.next {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .nav-btn.next:hover {
+            background: #1d4ed8;
+        }
+
+        .process-btn {
+            width: 100%;
+            padding: 10px 16px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            margin-top: 16px;
+        }
+
+        .process-btn:hover {
+            background: #059669;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+
+        .modal-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-option {
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-option:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .modal-option .icon {
+            font-size: 28px;
+        }
+
+        .modal-option .text h4 {
+            font-size: 16px;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .modal-option .text p {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .modal-close {
+            margin-top: 16px;
+            padding: 10px;
+            background: #e5e7eb;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            width: 100%;
+        }
+
+        .modal-close:hover {
+            background: #d1d5db;
+        }
+
+        .progress-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-modal.active {
+            display: flex;
+        }
+
+        .progress-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 400px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #10b981;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .bucket-summary {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .summary-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1f2937;
+        }
+
+        .summary-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .summary-item {
+            padding: 6px 12px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #4b5563;
+        }
+
+        .summary-item span {
+            font-weight: 600;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="menu-header">MENU</div>
+            <div class="nav-links">
+                <div class="nav-item" onclick="goToHome()">
+                    <span>🏠 Home</span>
+                </div>
+                <div class="nav-item active">
+                    <span>📁 Manage Docs</span>
+                    <span class="badge" id="docCount">0</span>
+                </div>
+                <div class="nav-item">
+                    <span>💼 Workspace</span>
+                </div>
+                <div class="nav-item">
+                    <span>📊 Results</span>
+                </div>
+            </div>
+            <div class="settings-section">
+                <div class="menu-header">SETTINGS</div>
+                <div class="nav-item">
+                    <span>👤 Profile</span>
+                </div>
+                <div class="nav-item">
+                    <span>❓ Help</span>
+                </div>
+                <div class="nav-item">
+                    <span>🚪 Logout</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <div class="header-left">
+                    <button onclick="goToSmartSegregation()" class="header-btn">←</button>
+                    <span style="font-size: 14px;" id="batchName">Document Segregation</span>
+                </div>
+                <div class="upload-options">
+                    <button class="upload-btn" onclick="showUploadModal()">
+                        📤 Upload PDF/Folder
+                    </button>
+                    <span style="font-size: 14px;" id="attachmentCount">🔗 0 Files</span>
+                </div>
+            </div>
+
+            <div class="workspace-area">
+                <div class="document-viewer">
+                    <div class="document-display" id="documentDisplay">
+                        <canvas id="pdfCanvas"></canvas>
+                        <div id="placeholderContent">
+                            <div class="doc-icon">📄</div>
+                            <div class="doc-title">Document <span id="currentDoc">0</span></div>
+                            <div class="doc-subtitle">Upload a PDF or folder to begin</div>
+                            <div id="assignmentStatus"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-panel">
+                    <div class="bucket-grid">
+                        <div class="bucket-card" data-bucket="KYC">
+                            <div class="bucket-label">KYC</div>
+                            <div class="bucket-pages" id="kycCount">0 pages</div>
+                        </div>
+                        <div class="bucket-card" data-bucket="AF">
+                            <div class="bucket-label">AF</div>
+                            <div class="bucket-pages" id="afCount">0 pages</div>
+                        </div>
+                        <div class="bucket-card" data-bucket="Photo">
+                            <div class="bucket-label">Photo</div>
+                            <div class="bucket-pages" id="photoCount">0 pages</div>
+                        </div>
+                        <div class="bucket-card" data-bucket="IC">
+                            <div class="bucket-label">IC</div>
+                            <div class="bucket-pages" id="icCount">0 pages</div>
+                        </div>
+                        <div class="bucket-card" data-bucket="CIBIL">
+                            <div class="bucket-label">CIBIL</div>
+                            <div class="bucket-pages" id="cibilCount">0 pages</div>
+                        </div>
+                        <div class="bucket-card" data-bucket="TIR">
+                            <div class="bucket-label">TIR</div>
+                            <div class="bucket-pages" id="tirCount">0 pages</div>
+                        </div>
+                        <div class="bucket-card" data-bucket="LD">
+                            <div class="bucket-label">LD</div>
+                            <div class="bucket-pages" id="ldCount">0 pages</div>
+                        </div>
+                        <div class="bucket-card" data-bucket="Others">
+                            <div class="bucket-label">Others</div>
+                            <div class="bucket-pages" id="othersCount">0 pages</div>
+                        </div>
+                    </div>
+
+                    <div class="assignment-box">
+                        <div class="assignment-title">Assign to Bucket Here</div>
+                        <div class="bucket-buttons">
+                            <button class="bucket-btn" data-bucket="KYC">KYC</button>
+                            <button class="bucket-btn" data-bucket="AF">AF</button>
+                            <button class="bucket-btn" data-bucket="Photo">Photo</button>
+                            <button class="bucket-btn" data-bucket="IC">IC</button>
+                            <button class="bucket-btn" data-bucket="CIBIL">CIBIL</button>
+                            <button class="bucket-btn" data-bucket="TIR">TIR</button>
+                            <button class="bucket-btn" data-bucket="LD">LD</button>
+                            <button class="bucket-btn" data-bucket="Others">Others</button>
+                        </div>
+                        <button class="assign-btn" id="assignBtn">Assign</button>
+                    </div>
+
+                    <div class="bucket-summary">
+                        <div class="summary-title">Bucket Summary</div>
+                        <div class="summary-list" id="bucketSummary">
+                            <div class="summary-item">KYC: <span>0</span></div>
+                            <div class="summary-item">AF: <span>0</span></div>
+                            <div class="summary-item">Photo: <span>0</span></div>
+                            <div class="summary-item">IC: <span>0</span></div>
+                            <div class="summary-item">CIBIL: <span>0</span></div>
+                            <div class="summary-item">TIR: <span>0</span></div>
+                            <div class="summary-item">LD: <span>0</span></div>
+                            <div class="summary-item">Others: <span>0</span></div>
+                        </div>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="nav-btn" id="prevBtn">
+                            ← Previous
+                        </button>
+                        <button class="nav-btn next" id="nextBtn">
+                            Next →
+                        </button>
+                    </div>
+
+                    <button class="process-btn" onclick="saveToBuckets()">
+                        💾 Save All to Buckets
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <h3 class="modal-header">Upload Documents</h3>
+            <div class="modal-options">
+                <div class="modal-option" onclick="uploadSinglePDF()">
+                    <div class="icon">📄</div>
+                    <div class="text">
+                        <h4>Single PDF</h4>
+                        <p>Upload one PDF document</p>
+                    </div>
+                </div>
+                <div class="modal-option" onclick="uploadMultiplePDFs()">
+                    <div class="icon">📚</div>
+                    <div class="text">
+                        <h4>Multiple PDFs</h4>
+                        <p>Upload multiple PDF files</p>
+                    </div>
+                </div>
+                <div class="modal-option" onclick="uploadFolder()">
+                    <div class="icon">📁</div>
+                    <div class="text">
+                        <h4>Folder</h4>
+                        <p>Upload a folder with PDFs</p>
+                    </div>
+                </div>
+            </div>
+            <button class="modal-close" onclick="closeUploadModal()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Progress Modal -->
+    <div class="progress-modal" id="progressModal">
+        <div class="progress-content">
+            <h3 id="progressTitle">Uploading Files</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p id="progressText">Processing files...</p>
+            <p id="fileCount">0 of 0 files processed</p>
+        </div>
+    </div>
+
+    <!-- Hidden File Inputs -->
+    <input type="file" id="singlePDFInput" accept=".pdf" style="display: none;">
+    <input type="file" id="multiplePDFInput" accept=".pdf" multiple style="display: none;">
+    <input type="file" id="folderInput" webkitdirectory directory multiple style="display: none;">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // Global variables
+        let currentDoc = 1;
+        let totalDocs = 0;
+        let selectedBucket = null;
+        let assignments = {};
+        let pdfDoc = null;
+        let pageRendering = false;
+        let uploadedFiles = [];
+        let currentFileIndex = 0;
+        let bucketPages = {
+            'KYC': [],
+            'AF': [],
+            'Photo': [],
+            'IC': [],
+            'CIBIL': [],
+            'TIR': [],
+            'LD': [],
+            'Others': []
+        };
+
+        // DOM elements
+        const currentDocEl = document.getElementById('currentDoc');
+        const assignmentStatus = document.getElementById('assignmentStatus');
+        const assignBtn = document.getElementById('assignBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const pdfCanvas = document.getElementById('pdfCanvas');
+        const placeholderContent = document.getElementById('placeholderContent');
+        const attachmentCount = document.getElementById('attachmentCount');
+        const docCount = document.getElementById('docCount');
+
+        // Initialize PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // Upload functions
+        function showUploadModal() {
+            document.getElementById('uploadModal').classList.add('active');
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.remove('active');
+        }
+
+        function uploadSinglePDF() {
+            closeUploadModal();
+            document.getElementById('singlePDFInput').click();
+        }
+
+        function uploadMultiplePDFs() {
+            closeUploadModal();
+            document.getElementById('multiplePDFInput').click();
+        }
+
+        function uploadFolder() {
+            closeUploadModal();
+            document.getElementById('folderInput').click();
+        }
+
+        // Setup file input event listeners
+        function setupFileInputListeners() {
+            // Single PDF
+            document.getElementById('singlePDFInput').addEventListener('change', function(e) {
+                handleFileUpload(e.target.files, 'single');
+                this.value = ''; // Reset input
+            });
+
+            // Multiple PDFs
+            document.getElementById('multiplePDFInput').addEventListener('change', function(e) {
+                handleFileUpload(e.target.files, 'multiple');
+                this.value = ''; // Reset input
+            });
+
+            // Folder
+            document.getElementById('folderInput').addEventListener('change', function(e) {
+                handleFileUpload(e.target.files, 'folder');
+                this.value = ''; // Reset input
+            });
+        }
+
+        // Handle file upload
+        function handleFileUpload(files, type) {
+            console.log('Files received:', files.length, 'Type:', type);
+            
+            // Filter only PDF files
+            const pdfFiles = Array.from(files).filter(file => {
+                const isPDF = file.type === 'application/pdf' || 
+                             file.name.toLowerCase().endsWith('.pdf');
+                console.log('File:', file.name, 'is PDF:', isPDF);
+                return isPDF;
+            });
+
+            if (pdfFiles.length === 0) {
+                alert('No PDF files found. Please select PDF files only.');
+                return;
+            }
+
+            console.log('Valid PDF files:', pdfFiles.length);
+
+            // Show progress modal
+            showProgressModal(`Uploading ${pdfFiles.length} PDF file${pdfFiles.length > 1 ? 's' : ''}...`);
+
+            // Process files
+            uploadedFiles = pdfFiles;
+            currentFileIndex = 0;
+
+            // Update UI
+            attachmentCount.textContent = `🔗 ${pdfFiles.length} File${pdfFiles.length > 1 ? 's' : ''}`;
+
+            // Load first PDF
+            loadPDFFile(pdfFiles[0], 0);
+
+            // Hide progress modal after a delay
+            setTimeout(() => {
+                hideProgressModal();
+                if (pdfFiles.length > 1) {
+                    alert(`${pdfFiles.length} PDF files uploaded successfully!`);
+                } else {
+                    alert('PDF uploaded successfully!');
+                }
+            }, 1500);
+        }
+
+        // Show progress modal
+        function showProgressModal(message) {
+            document.getElementById('progressTitle').textContent = message;
+            document.getElementById('progressText').textContent = 'Processing files...';
+            document.getElementById('progressFill').style.width = '30%';
+            document.getElementById('progressModal').classList.add('active');
+        }
+
+        // Update progress
+        function updateProgress(percent, current, total) {
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').textContent = `Processing ${current} of ${total} files`;
+            document.getElementById('fileCount').textContent = `${current} of ${total} files processed`;
+        }
+
+        // Hide progress modal
+        function hideProgressModal() {
+            document.getElementById('progressModal').classList.remove('active');
+            document.getElementById('progressFill').style.width = '0%';
+        }
+
+        // Load PDF file
+        function loadPDFFile(file, index) {
+            console.log('Loading PDF file:', file.name, 'Index:', index);
+            
+            const fileReader = new FileReader();
+            
+            fileReader.onload = function() {
+                console.log('File read successfully');
+                const typedarray = new Uint8Array(this.result);
+                
+                pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+                    console.log('PDF loaded, pages:', pdf.numPages);
+                    
+                    pdfDoc = pdf;
+                    totalDocs = pdf.numPages;
+                    currentDoc = 1;
+                    currentFileIndex = index;
+                    
+                    // Update UI
+                    docCount.textContent = totalDocs;
+                    currentDocEl.textContent = currentDoc;
+                    
+                    // Render first page
+                    renderPage(currentDoc);
+                    placeholderContent.style.display = 'none';
+                    
+                    // Update subtitle
+                    if (uploadedFiles.length > 1) {
+                        document.querySelector('.doc-subtitle').textContent = 
+                            `File ${index + 1} of ${uploadedFiles.length} - Page 1 of ${totalDocs}`;
+                    } else {
+                        document.querySelector('.doc-subtitle').textContent = 
+                            `Page 1 of ${totalDocs}`;
+                    }
+                    
+                    // Update progress
+                    updateProgress(100, index + 1, uploadedFiles.length);
+                    
+                    updateNavigation();
+                }).catch(function(error) {
+                    console.error('Error loading PDF:', error);
+                    alert('Error loading PDF file: ' + file.name);
+                });
+            };
+            
+            fileReader.onerror = function(error) {
+                console.error('Error reading file:', error);
+                alert('Error reading file: ' + file.name);
+            };
+            
+            fileReader.readAsArrayBuffer(file);
+        }
+
+        // Render PDF page
+        function renderPage(pageNum) {
+            if (!pdfDoc) {
+                console.error('No PDF document loaded');
+                return;
+            }
+            
+            console.log('Rendering page:', pageNum);
+            
+            pdfDoc.getPage(pageNum).then(function(page) {
+                const viewport = page.getViewport({ scale: 1.5 });
+                const canvas = pdfCanvas;
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                
+                page.render(renderContext).promise.then(function() {
+                    console.log('Page rendered successfully');
+                    placeholderContent.style.display = 'none';
+                    pdfCanvas.style.display = 'block';
+                    
+                    // Auto-classify document
+                    autoClassifyDocument(pageNum);
+                });
+            }).catch(function(error) {
+                console.error('Error rendering page:', error);
+                alert('Error rendering page ' + pageNum);
+            });
+        }
+
+        // Auto-classify document
+        function autoClassifyDocument(pageNum) {
+            console.log('Auto-classifying page:', pageNum);
+            
+            assignmentStatus.innerHTML = `
+                <div class="assignment-badge" style="background: #fef3c7; color: #d97706;">
+                    ⏳ Auto-detecting document type...
+                </div>
+            `;
+            
+            // Simulate processing delay
+            setTimeout(() => {
+                const suggestedBucket = classifyDocument(pageNum);
+                console.log('Suggested bucket:', suggestedBucket);
+                selectBucket(suggestedBucket);
+                
+                assignmentStatus.innerHTML = `
+                    <div class="assignment-badge" style="background: #dbeafe; color: #1e40af;">
+                        🤖 Auto-detected: ${suggestedBucket}
+                        <button onclick="acceptAutoClassification()" 
+                                style="margin-left: 8px; padding: 4px 8px; background: #2563eb; 
+                                       color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">
+                            ✓ Accept
+                        </button>
+                    </div>
+                `;
+            }, 500);
+        }
+
+        // Classify document
+        function classifyDocument(pageNum) {
+            const patterns = [
+                { range: [1, 2], type: 'KYC' },
+                { range: [3, 5], type: 'AF' },
+                { range: [6, 7], type: 'Photo' },
+                { range: [8, 8], type: 'IC' },
+                { range: [9, 11], type: 'CIBIL' },
+                { range: [12, 13], type: 'TIR' },
+                { range: [14, 14], type: 'LD' }
+            ];
+            
+            for (const pattern of patterns) {
+                if (pageNum >= pattern.range[0] && pageNum <= pattern.range[1]) {
+                    return pattern.type;
+                }
+            }
+            
+            return 'Others';
+        }
+
+        // Accept auto-classification
+        window.acceptAutoClassification = function() {
+            console.log('Accepting auto-classification');
+            if (selectedBucket) {
+                assignToBucket();
+            }
+        }
+
+        // Bucket selection
+        function setupBucketSelection() {
+            const bucketCards = document.querySelectorAll('.bucket-card');
+            const bucketBtns = document.querySelectorAll('.bucket-btn');
+
+            bucketCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const bucket = card.dataset.bucket;
+                    console.log('Bucket card clicked:', bucket);
+                    selectBucket(bucket);
+                });
+            });
+
+            bucketBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const bucket = btn.dataset.bucket;
+                    console.log('Bucket button clicked:', bucket);
+                    selectBucket(bucket);
+                });
+            });
+
+            // Assign button
+            assignBtn.addEventListener('click', function() {
+                console.log('Assign button clicked');
+                assignToBucket();
+            });
+        }
+
+        function selectBucket(bucket) {
+            console.log('Selecting bucket:', bucket);
+            selectedBucket = bucket;
+            
+            // Update bucket cards
+            document.querySelectorAll('.bucket-card').forEach(card => {
+                if (card.dataset.bucket === bucket) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+
+            // Update bucket buttons
+            document.querySelectorAll('.bucket-btn').forEach(btn => {
+                if (btn.dataset.bucket === bucket) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+
+            // Enable assign button
+            assignBtn.classList.add('active');
+        }
+
+        // Assign to bucket
+        function assignToBucket() {
+            if (!selectedBucket) {
+                console.log('No bucket selected');
+                return;
+            }
+
+            console.log('Assigning to bucket:', selectedBucket);
+            
+            // Create unique key for this page
+            const pageKey = uploadedFiles.length > 1 ? 
+                `${currentFileIndex}_${currentDoc}` : currentDoc.toString();
+            
+            // Store assignment
+            assignments[pageKey] = selectedBucket;
+            
+            // Add to bucket pages
+            bucketPages[selectedBucket].push({
+                fileIndex: currentFileIndex,
+                pageNum: currentDoc,
+                bucket: selectedBucket,
+                fileName: uploadedFiles[currentFileIndex]?.name || 'Unknown'
+            });
+            
+            // Update UI
+            updateBucketCounts();
+            updateAssignmentStatus();
+            clearSelection();
+            
+            // Auto move to next
+            autoMoveNext();
+        }
+
+        // Update bucket counts
+        function updateBucketCounts() {
+            console.log('Updating bucket counts:', bucketPages);
+            
+            // Update bucket card counts
+            document.getElementById('kycCount').textContent = `${bucketPages.KYC.length} pages`;
+            document.getElementById('afCount').textContent = `${bucketPages.AF.length} pages`;
+            document.getElementById('photoCount').textContent = `${bucketPages.Photo.length} pages`;
+            document.getElementById('icCount').textContent = `${bucketPages.IC.length} pages`;
+            document.getElementById('cibilCount').textContent = `${bucketPages.CIBIL.length} pages`;
+            document.getElementById('tirCount').textContent = `${bucketPages.TIR.length} pages`;
+            document.getElementById('ldCount').textContent = `${bucketPages.LD.length} pages`;
+            document.getElementById('othersCount').textContent = `${bucketPages.Others.length} pages`;
+
+            // Update summary
+            const summaryItems = document.querySelectorAll('.summary-item');
+            summaryItems.forEach(item => {
+                const bucket = item.textContent.split(':')[0].trim();
+                const span = item.querySelector('span');
+                span.textContent = bucketPages[bucket].length;
+            });
+        }
+
+        // Auto move to next
+        function autoMoveNext() {
+            console.log('Auto moving next, currentDoc:', currentDoc, 'totalDocs:', totalDocs);
+            
+            setTimeout(() => {
+                if (currentDoc < totalDocs) {
+                    // Move to next page in same PDF
+                    currentDoc++;
+                    renderPage(currentDoc);
+                    updateDocument();
+                } else if (currentFileIndex < uploadedFiles.length - 1) {
+                    // Move to next PDF file
+                    console.log('Moving to next file');
+                    currentFileIndex++;
+                    currentDoc = 1;
+                    loadPDFFile(uploadedFiles[currentFileIndex], currentFileIndex);
+                } else {
+                    console.log('All files processed');
+                    alert('All documents have been processed! Click "Save All to Buckets" to save.');
+                }
+            }, 500);
+        }
+
+        // Update assignment status
+        function updateAssignmentStatus() {
+            const pageKey = uploadedFiles.length > 1 ? 
+                `${currentFileIndex}_${currentDoc}` : currentDoc.toString();
+            
+            if (assignments[pageKey]) {
+                assignmentStatus.innerHTML = `
+                    <div class="assignment-badge">
+                        ✓ Assigned to: ${assignments[pageKey]}
+                    </div>
+                `;
+            } else {
+                assignmentStatus.innerHTML = '';
+            }
+        }
+
+        // Clear selection
+        function clearSelection() {
+            selectedBucket = null;
+            document.querySelectorAll('.bucket-card').forEach(card => card.classList.remove('selected'));
+            document.querySelectorAll('.bucket-btn').forEach(btn => btn.classList.remove('selected'));
+            assignBtn.classList.remove('active');
+        }
+
+        // Update document
+        function updateDocument() {
+            currentDocEl.textContent = currentDoc;
+            clearSelection();
+            updateAssignmentStatus();
+            updateNavigation();
+        }
+
+        // Update navigation
+        function updateNavigation() {
+            prevBtn.disabled = currentDoc === 1;
+            nextBtn.disabled = currentDoc >= totalDocs;
+        }
+
+        // Navigation buttons
+        function setupNavigation() {
+            prevBtn.addEventListener('click', () => {
+                if (currentDoc > 1) {
+                    currentDoc--;
+                    renderPage(currentDoc);
+                    updateDocument();
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (currentDoc < totalDocs) {
+                    currentDoc++;
+                    renderPage(currentDoc);
+                    updateDocument();
+                } else if (currentFileIndex < uploadedFiles.length - 1) {
+                    currentFileIndex++;
+                    currentDoc = 1;
+                    loadPDFFile(uploadedFiles[currentFileIndex], currentFileIndex);
+                }
+            });
+        }
+
+        // Save to buckets
+        async function saveToBuckets() {
+            console.log('Saving to buckets');
+            
+            // Check if any pages are assigned
+            const totalPages = Object.values(bucketPages).reduce((sum, arr) => sum + arr.length, 0);
+            if (totalPages === 0) {
+                alert('Please assign at least one page to a bucket');
+                return;
+            }
+
+            console.log('Total pages to save:', totalPages);
+            
+            // Show progress
+            showProgressModal('Creating PDFs for each bucket...');
+            document.getElementById('progressFill').style.width = '20%';
+            
+            try {
+                let bucketIndex = 0;
+                const bucketNames = Object.keys(bucketPages);
+                
+                // Create PDF for each bucket
+                for (const bucketName of bucketNames) {
+                    const pages = bucketPages[bucketName];
+                    if (pages.length > 0) {
+                        console.log(`Creating PDF for ${bucketName} with ${pages.length} pages`);
+                        
+                        // Update progress
+                        const progressPercent = 20 + (bucketIndex * (60 / bucketNames.length));
+                        updateProgress(progressPercent, bucketIndex + 1, bucketNames.length);
+                        
+                        await createBucketPDF(bucketName, pages);
+                        bucketIndex++;
+                    }
+                }
+
+                // Update progress to 100%
+                document.getElementById('progressFill').style.width = '100%';
+                document.getElementById('progressText').textContent = 'All PDFs created successfully!';
+                document.getElementById('fileCount').textContent = `Created ${bucketIndex} PDF files`;
+
+                // Hide modal after delay
+                setTimeout(() => {
+                    hideProgressModal();
+                    alert(`✅ Successfully created ${bucketIndex} PDF files!\n\nEach bucket has been saved as a separate PDF file.\nCheck your downloads folder.`);
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error saving buckets:', error);
+                alert('Error saving buckets. Please try again.');
+                hideProgressModal();
+            }
+        }
+
+        // Create PDF for a bucket
+        async function createBucketPDF(bucketName, pages) {
+            console.log(`Creating PDF for ${bucketName}`);
+            
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            
+            let isFirstPage = true;
+
+            for (let i = 0; i < pages.length; i++) {
+                const pageInfo = pages[i];
+                const { fileIndex, pageNum } = pageInfo;
+                const file = uploadedFiles[fileIndex];
+                
+                console.log(`Adding page ${pageNum} from file ${file?.name}`);
+                
+                try {
+                    // Load the PDF file
+                    const pdfData = await pdfjsLib.getDocument(await file.arrayBuffer()).promise;
+                    const page = await pdfData.getPage(pageNum);
+                    
+                    // Get page dimensions
+                    const viewport = page.getViewport({ scale: 1.0 });
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    
+                    // Render page to canvas
+                    await page.render({
+                        canvasContext: context,
+                        viewport: viewport
+                    }).promise;
+                    
+                    // Convert canvas to image
+                    const imgData = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    // Add to PDF
+                    if (!isFirstPage) {
+                        pdf.addPage();
+                    }
+                    
+                    // Calculate image dimensions
+                    const imgWidth = 190;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    
+                    // Add image to PDF
+                    pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
+                    isFirstPage = false;
+                    
+                } catch (error) {
+                    console.error(`Error processing page ${pageNum} from ${file?.name}:`, error);
+                }
+            }
+
+            // Save the PDF
+            console.log(`Saving ${bucketName}_Bucket.pdf`);
+            pdf.save(`${bucketName}_Bucket.pdf`);
+        }
+
+        // Navigation functions
+        function goToSmartSegregation() {
+            window.location.href = "smartSegregation.html";
+        }
+
+        function goToHome() {
+            window.location.href = "index.html";
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+            
+            // Setup event listeners
+            setupFileInputListeners();
+            setupBucketSelection();
+            setupNavigation();
+            
+            // Initialize UI
+            updateBucketCounts();
+            updateDocument();
+            
+            console.log('Initialization complete');
+        });
+    </script>
+</body>
+</html>
